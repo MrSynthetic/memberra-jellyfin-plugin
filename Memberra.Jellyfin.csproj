@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Memberra.Jellyfin</RootNamespace>
+    <AssemblyName>Memberra.Jellyfin</AssemblyName>
+    <Version>1.0.0-beta.1</Version>
+    <Description>Securely connects a Jellyfin server to the Memberra operator platform.</Description>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/MrSynthetic/memberra-jellyfin-plugin</RepositoryUrl>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="10.11.11"><ExcludeAssets>runtime</ExcludeAssets></PackageReference>
+    <PackageReference Include="Jellyfin.Model" Version="10.11.11"><ExcludeAssets>runtime</ExcludeAssets></PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.11" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Configuration/configPage.html" />
+    <EmbeddedResource Include="Configuration/configPage.html" />
+  </ItemGroup>
+</Project>

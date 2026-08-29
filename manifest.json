@@ -1,0 +1,20 @@
+[
+  {
+    "guid": "5ca86b57-a68e-4c38-9089-87a809d14ec6",
+    "name": "Memberra",
+    "description": "Securely connect Jellyfin to the Memberra operator platform.",
+    "overview": "Pair a Jellyfin server with Memberra for health reporting, event delivery and managed operator workflows.",
+    "owner": "Memberra",
+    "category": "General",
+    "versions": [
+      {
+        "version": "1.0.0.0",
+        "changelog": "Initial public beta catalogue release for Jellyfin 10.11.x.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.0.0-beta.1/Memberra-Jellyfin-1.0.0-beta.1.zip",
+        "checksum": "fddb5300c7a3410e4aa7de3bcf238bba",
+        "timestamp": "2026-08-29T17:51:59Z"
+      }
+    ]
+  }
+]
