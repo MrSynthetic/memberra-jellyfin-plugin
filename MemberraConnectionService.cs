@@ -45,12 +45,20 @@ public sealed class MemberraConnectionService : BackgroundService
 
     private async Task PairAsync(Configuration.PluginConfiguration cfg, CancellationToken ct)
     {
-        using var http = _clients.CreateClient();
-        using var response = await http.PostAsJsonAsync(cfg.MemberraUrl.TrimEnd('/') + "/api/public/jellyfin-plugin/register", new { pairingCode = cfg.PairingCode.Trim(), serverId = _host.SystemId, serverName = "Jellyfin " + _host.SystemId[..8], jellyfinVersion = _host.ApplicationVersionString, pluginVersion = "1.0.0-beta.1" }, ct).ConfigureAwait(false);
+        using var http = _clients.CreateClient(MemberraProtocol.HttpClientName);
+        using var response = await http.PostAsJsonAsync(MemberraProtocol.RegisterUri, new { pairingCode = cfg.PairingCode.Trim(), serverId = _host.SystemId, serverName = "Jellyfin " + _host.SystemId[..8], jellyfinVersion = _host.ApplicationVersionString, pluginVersion = MemberraProtocol.Version }, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode) { _log.LogWarning("Memberra pairing rejected with HTTP {Status}", (int)response.StatusCode); return; }
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
-        cfg.InstallId = doc.RootElement.GetProperty("installId").GetString() ?? string.Empty;
-        cfg.InstallToken = doc.RootElement.GetProperty("installToken").GetString() ?? string.Empty;
+        var installId = doc.RootElement.GetProperty("installId").GetString() ?? string.Empty;
+        var installToken = doc.RootElement.GetProperty("installToken").GetString() ?? string.Empty;
+        if (installId.Length is < 16 or > 128 || installToken.Length is < 32 or > 512)
+        {
+            _log.LogWarning("Memberra pairing returned invalid credentials");
+            return;
+        }
+        cfg.MemberraUrl = "https://memberra.co.uk";
+        cfg.InstallId = installId;
+        cfg.InstallToken = installToken;
         cfg.PairingCode = string.Empty;
         Plugin.Instance!.SaveConfiguration(cfg);
         _log.LogInformation("Memberra pairing completed for install {InstallId}", cfg.InstallId);
@@ -59,8 +67,8 @@ public sealed class MemberraConnectionService : BackgroundService
     private async Task HeartbeatAsync(Configuration.PluginConfiguration cfg, CancellationToken ct)
     {
         _log.LogDebug("Sending Memberra heartbeat");
-        using var http = _clients.CreateClient();
-        using var request = new HttpRequestMessage(HttpMethod.Post, cfg.MemberraUrl.TrimEnd('/') + "/api/public/jellyfin-plugin/heartbeat") { Content = JsonContent.Create(new { serverName = "Jellyfin " + _host.SystemId[..8], jellyfinVersion = _host.ApplicationVersionString, pluginVersion = "1.0.0-beta.1" }) };
+        using var http = _clients.CreateClient(MemberraProtocol.HttpClientName);
+        using var request = new HttpRequestMessage(HttpMethod.Post, MemberraProtocol.HeartbeatUri) { Content = JsonContent.Create(new { serverName = "Jellyfin " + _host.SystemId[..8], jellyfinVersion = _host.ApplicationVersionString, pluginVersion = MemberraProtocol.Version }) };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cfg.InstallId + "." + cfg.InstallToken);
         using var response = await http.SendAsync(request, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode) _log.LogWarning("Memberra heartbeat rejected with HTTP {Status}", (int)response.StatusCode);

@@ -9,11 +9,11 @@
     "versions": [
       {
         "version": "1.0.0.0",
-        "changelog": "Initial public beta catalogue release for Jellyfin 10.11.x.",
+        "changelog": "Production release for Jellyfin 10.11.x with fixed-endpoint transport hardening, bounded playback state, replay-safe event ingestion and live watch analytics.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.0.0-beta.1/Memberra-Jellyfin-1.0.0-beta.1.zip",
-        "checksum": "fddb5300c7a3410e4aa7de3bcf238bba",
-        "timestamp": "2026-08-29T17:51:59Z"
+        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.0.0/Memberra-Jellyfin-1.0.0.zip",
+        "checksum": "5a6c62831853163dc8ee0cf69cfb9c04",
+        "timestamp": "2026-08-29T20:15:48Z"
       }
     ]
   }

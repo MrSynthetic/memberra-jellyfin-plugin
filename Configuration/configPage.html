@@ -5,8 +5,8 @@
   <div data-role="content"><div class="content-primary">
     <form id="MemberraConfigForm">
       <div class="sectionTitleContainer flex align-items-center"><h2 class="sectionTitle">Memberra connection</h2></div>
-      <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="MemberraUrl">Memberra URL</label><input id="MemberraUrl" is="emby-input" required /></div>
-      <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="PairingCode">One-time pairing code</label><input id="PairingCode" is="emby-input" autocomplete="off" /></div>
+      <div class="fieldDescription">Securely connects to <strong>https://memberra.co.uk</strong>. The destination is fixed to protect pairing credentials and playback data.</div>
+      <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="PairingCode">One-time pairing code</label><input id="PairingCode" is="emby-input" type="password" autocomplete="one-time-code" /></div>
       <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="ProgressInterval">Progress interval (seconds)</label><input id="ProgressInterval" is="emby-input" type="number" min="5" max="300" /></div>
       <label class="checkboxContainer"><input id="Enabled" type="checkbox" is="emby-checkbox"/><span>Enable Memberra integration</span></label>
       <button is="emby-button" type="submit" class="raised button-submit block"><span>Save</span></button>
@@ -14,8 +14,8 @@
   </div></div>
   <script type="text/javascript">
     (() => { const id='5ca86b57-a68e-4c38-9089-87a809d14ec6', page=document.querySelector('#MemberraConfigPage');
-      page.addEventListener('pageshow',()=>Dashboard.showLoadingMsg()||ApiClient.getPluginConfiguration(id).then(c=>{page.querySelector('#MemberraUrl').value=c.MemberraUrl;page.querySelector('#PairingCode').value='';page.querySelector('#ProgressInterval').value=c.ProgressIntervalSeconds;page.querySelector('#Enabled').checked=c.Enabled;Dashboard.hideLoadingMsg();}));
-      page.querySelector('#MemberraConfigForm').addEventListener('submit',e=>{e.preventDefault();Dashboard.showLoadingMsg();ApiClient.getPluginConfiguration(id).then(c=>{c.MemberraUrl=page.querySelector('#MemberraUrl').value;const p=page.querySelector('#PairingCode').value.trim();if(p)c.PairingCode=p;c.ProgressIntervalSeconds=Number(page.querySelector('#ProgressInterval').value)||15;c.Enabled=page.querySelector('#Enabled').checked;return ApiClient.updatePluginConfiguration(id,c)}).then(Dashboard.processPluginConfigurationUpdateResult);});
+      page.addEventListener('pageshow',()=>Dashboard.showLoadingMsg()||ApiClient.getPluginConfiguration(id).then(c=>{page.querySelector('#PairingCode').value='';page.querySelector('#ProgressInterval').value=c.ProgressIntervalSeconds;page.querySelector('#Enabled').checked=c.Enabled;Dashboard.hideLoadingMsg();}));
+      page.querySelector('#MemberraConfigForm').addEventListener('submit',e=>{e.preventDefault();Dashboard.showLoadingMsg();ApiClient.getPluginConfiguration(id).then(c=>{c.MemberraUrl='https://memberra.co.uk';const p=page.querySelector('#PairingCode').value.trim();if(p)c.PairingCode=p;c.ProgressIntervalSeconds=Math.min(300,Math.max(5,Number(page.querySelector('#ProgressInterval').value)||15));c.Enabled=page.querySelector('#Enabled').checked;return ApiClient.updatePluginConfiguration(id,c)}).then(Dashboard.processPluginConfigurationUpdateResult);});
     })();
   </script>
 </div></body></html>

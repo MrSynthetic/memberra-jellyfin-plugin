@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
@@ -11,6 +12,10 @@ namespace Memberra.Jellyfin;
 public sealed class MemberraClient
 {
     private static readonly ConcurrentDictionary<string, DateTimeOffset> LastProgress = new();
+    private static readonly object ProgressLock = new();
+    private static readonly TimeSpan ProgressEntryLifetime = TimeSpan.FromMinutes(10);
+    private const int MaximumTrackedSessions = 4096;
+    private static int _cleanupCounter;
     private readonly HttpClient _http;
     private readonly ILogger<MemberraClient> _log;
 
@@ -18,7 +23,11 @@ public sealed class MemberraClient
     {
         _http = http;
         _log = log;
-        _http.Timeout = TimeSpan.FromSeconds(10);
+    }
+
+    public void ForgetSession(string sessionId)
+    {
+        lock (ProgressLock) LastProgress.TryRemove(sessionId, out _);
     }
 
     public async Task SendAsync(object payload, string sessionId, bool progress, CancellationToken ct = default)
@@ -28,16 +37,39 @@ public sealed class MemberraClient
         if (progress)
         {
             var now = DateTimeOffset.UtcNow;
-            var previous = LastProgress.GetOrAdd(sessionId, DateTimeOffset.MinValue);
-            if ((now - previous).TotalSeconds < Math.Clamp(cfg.ProgressIntervalSeconds, 5, 300)) return;
-            LastProgress[sessionId] = now;
+            lock (ProgressLock)
+            {
+                if (Interlocked.Increment(ref _cleanupCounter) % 256 == 0 || LastProgress.Count >= MaximumTrackedSessions)
+                {
+                    foreach (var entry in LastProgress)
+                    {
+                        if (now - entry.Value > ProgressEntryLifetime)
+                        {
+                            ((ICollection<KeyValuePair<string, DateTimeOffset>>)LastProgress).Remove(entry);
+                        }
+                    }
+                }
+
+                if (LastProgress.Count >= MaximumTrackedSessions && !LastProgress.ContainsKey(sessionId))
+                {
+                    KeyValuePair<string, DateTimeOffset>? oldest = null;
+                    foreach (var entry in LastProgress)
+                    {
+                        if (oldest is null || entry.Value < oldest.Value.Value) oldest = entry;
+                    }
+                    if (oldest is not null) LastProgress.TryRemove(oldest.Value.Key, out _);
+                }
+
+                var previous = LastProgress.GetOrAdd(sessionId, DateTimeOffset.MinValue);
+                if ((now - previous).TotalSeconds < Math.Clamp(cfg.ProgressIntervalSeconds, 5, 300)) return;
+                LastProgress[sessionId] = now;
+            }
         }
 
         if (string.IsNullOrWhiteSpace(cfg.InstallId)) return;
-        var url = cfg.MemberraUrl.TrimEnd('/') + "/api/public/jellyfin-plugin/events";
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = JsonContent.Create(payload) };
+            using var request = new HttpRequestMessage(HttpMethod.Post, MemberraProtocol.EventsUri) { Content = JsonContent.Create(payload) };
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", cfg.InstallId + "." + cfg.InstallToken);
             using var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode) _log.LogWarning("Memberra event rejected with HTTP {Status}", (int)response.StatusCode);

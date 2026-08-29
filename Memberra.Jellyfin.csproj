@@ -3,7 +3,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>Memberra.Jellyfin</RootNamespace>
     <AssemblyName>Memberra.Jellyfin</AssemblyName>
-    <Version>1.0.0-beta.1</Version>
+    <Version>1.0.0</Version>
     <Description>Securely connects a Jellyfin server to the Memberra operator platform.</Description>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/MrSynthetic/memberra-jellyfin-plugin</RepositoryUrl>
