@@ -61,7 +61,7 @@ public sealed class MemberraConnectionService : BackgroundService
             jellyfinVersion = _host.ApplicationVersionString,
             pluginVersion = MemberraProtocol.Version,
             protocolVersion = MemberraProtocol.ProtocolVersion,
-            capabilities = MemberraProtocol.Capabilities(cfg.AllowRemoteStop)
+            capabilities = MemberraProtocol.Capabilities(cfg.AllowRemoteStop, cfg.AllowViewerMessages)
         }, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode) { _log.LogWarning("Memberra pairing rejected with HTTP {Status}", (int)response.StatusCode); return; }
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
@@ -91,7 +91,7 @@ public sealed class MemberraConnectionService : BackgroundService
             pluginVersion = MemberraProtocol.Version,
             protocolVersion = MemberraProtocol.ProtocolVersion,
             eventSchemaVersion = MemberraProtocol.EventSchemaVersion,
-            capabilities = MemberraProtocol.Capabilities(cfg.AllowRemoteStop),
+            capabilities = MemberraProtocol.Capabilities(cfg.AllowRemoteStop, cfg.AllowViewerMessages),
             outboxDepth = _outbox.Count,
             runtimeMetrics = new
             {

@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.2.0.0",
+        "changelog": "Capability-gated messages to active Jellyfin players, with bounded content, active-session validation, durable command receipts and operator-controlled opt-in.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.2.0/Memberra-Jellyfin-1.2.0.zip",
+        "checksum": "3f8463eae75e60629b92ecaabd563a98",
+        "timestamp": "2026-08-30T11:15:00Z"
+      },
+      {
         "version": "1.1.0.0",
         "changelog": "Durable ordered event delivery, outage and restart recovery, active-session reconciliation, explicit protocol and capability negotiation, queue diagnostics, and compatibility-first fail-safes.",
         "targetAbi": "10.11.0.0",

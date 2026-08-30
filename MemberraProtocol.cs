@@ -5,7 +5,7 @@ namespace Memberra.Jellyfin;
 
 internal static class MemberraProtocol
 {
-    public const string Version = "1.1.0";
+    public const string Version = "1.2.0";
     public const int ProtocolVersion = 2;
     public const int EventSchemaVersion = 1;
     public const string HttpClientName = "Memberra";
@@ -18,7 +18,7 @@ internal static class MemberraProtocol
     public static Uri EventsUri { get; } = new(BaseUri, "api/public/jellyfin-plugin/events");
     public static Uri CommandAckUri { get; } = new(BaseUri, "api/public/jellyfin-plugin/command-ack");
 
-    public static IReadOnlyDictionary<string, bool> Capabilities(bool allowRemoteStop) =>
+    public static IReadOnlyDictionary<string, bool> Capabilities(bool allowRemoteStop, bool allowViewerMessages) =>
         new Dictionary<string, bool>(StringComparer.Ordinal)
         {
             ["playback_events"] = true,
@@ -30,6 +30,7 @@ internal static class MemberraProtocol
             ["runtime_metrics"] = true,
             ["library_inventory"] = true,
             ["remote_stop"] = allowRemoteStop,
+            ["display_message"] = allowViewerMessages,
             ["server_metrics"] = false,
             ["library_events"] = false
         };

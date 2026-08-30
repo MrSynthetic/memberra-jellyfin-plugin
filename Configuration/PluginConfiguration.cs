@@ -16,4 +16,5 @@ public sealed class PluginConfiguration : BasePluginConfiguration
     public bool ReconciliationEnabled { get; set; } = true;
     public int ReconciliationIntervalSeconds { get; set; } = 30;
     public bool AllowRemoteStop { get; set; } = false;
+    public bool AllowViewerMessages { get; set; } = false;
 }

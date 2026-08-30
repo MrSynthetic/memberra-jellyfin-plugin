@@ -37,10 +37,6 @@ public sealed class MemberraCommandProcessor(
                     await AcknowledgeAsync(id, true, string.Empty, cfg, ct).ConfigureAwait(false);
                     continue;
                 }
-                if (!string.Equals(type, "stop_session", StringComparison.Ordinal))
-                    throw new InvalidOperationException("Unsupported command type.");
-                if (!cfg.AllowRemoteStop)
-                    throw new InvalidOperationException("Remote stop is disabled in the Jellyfin plugin settings.");
                 if (!command.TryGetProperty("payload", out var payload) ||
                     !payload.TryGetProperty("sessionId", out var sessionValue))
                     throw new InvalidOperationException("Command is missing a session id.");
@@ -50,11 +46,32 @@ public sealed class MemberraCommandProcessor(
                 if (!sessions.Sessions.Any(s => string.Equals(s.Id, sessionId, StringComparison.Ordinal) && s.NowPlayingItem is not null))
                     throw new InvalidOperationException("The playback session is no longer active.");
 
-                await sessions.SendPlaystateCommand(
-                    sessionId,
-                    sessionId,
-                    new PlaystateRequest { Command = PlaystateCommand.Stop },
-                    ct).ConfigureAwait(false);
+                if (string.Equals(type, "stop_session", StringComparison.Ordinal))
+                {
+                    if (!cfg.AllowRemoteStop)
+                        throw new InvalidOperationException("Remote stop is disabled in the Jellyfin plugin settings.");
+                    await sessions.SendPlaystateCommand(
+                        sessionId,
+                        sessionId,
+                        new PlaystateRequest { Command = PlaystateCommand.Stop },
+                        ct).ConfigureAwait(false);
+                }
+                else if (string.Equals(type, "display_message", StringComparison.Ordinal))
+                {
+                    if (!cfg.AllowViewerMessages)
+                        throw new InvalidOperationException("Viewer messages are disabled in the Jellyfin plugin settings.");
+                    var header = payload.TryGetProperty("header", out var headerValue) ? headerValue.GetString() : "Message from your provider";
+                    var text = payload.TryGetProperty("text", out var textValue) ? textValue.GetString() : null;
+                    var timeoutMs = payload.TryGetProperty("timeoutMs", out var timeoutValue) && timeoutValue.TryGetInt64(out var timeout) ? timeout : 10000;
+                    if (string.IsNullOrWhiteSpace(text) || text.Length > 240)
+                        throw new InvalidOperationException("Message text is missing or too long.");
+                    await sessions.SendMessageCommand(
+                        sessionId,
+                        sessionId,
+                        new MessageCommand { Header = string.IsNullOrWhiteSpace(header) ? "Message from your provider" : header[..Math.Min(header.Length, 60)], Text = text, TimeoutMs = Math.Clamp(timeoutMs, 3000, 30000) },
+                        ct).ConfigureAwait(false);
+                }
+                else throw new InvalidOperationException("Unsupported command type.");
                 receipts.MarkSucceeded(id);
                 succeeded = true;
             }
