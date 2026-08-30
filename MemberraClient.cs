@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -16,12 +14,12 @@ public sealed class MemberraClient
     private static readonly TimeSpan ProgressEntryLifetime = TimeSpan.FromMinutes(10);
     private const int MaximumTrackedSessions = 4096;
     private static int _cleanupCounter;
-    private readonly HttpClient _http;
+    private readonly DurableOutbox _outbox;
     private readonly ILogger<MemberraClient> _log;
 
-    public MemberraClient(HttpClient http, ILogger<MemberraClient> log)
+    public MemberraClient(DurableOutbox outbox, ILogger<MemberraClient> log)
     {
-        _http = http;
+        _outbox = outbox;
         _log = log;
     }
 
@@ -67,16 +65,16 @@ public sealed class MemberraClient
         }
 
         if (string.IsNullOrWhiteSpace(cfg.InstallId)) return;
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Post, MemberraProtocol.EventsUri) { Content = JsonContent.Create(payload) };
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", cfg.InstallId + "." + cfg.InstallToken);
-            using var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode) _log.LogWarning("Memberra event rejected with HTTP {Status}", (int)response.StatusCode);
-        }
+        try { await _outbox.EnqueueAsync(ReadEventId(payload), payload, ct).ConfigureAwait(false); }
         catch (Exception ex)
         {
-            _log.LogWarning(ex, "Memberra event delivery failed; Jellyfin playback is unaffected");
+            _log.LogError(ex, "Memberra event could not be persisted; Jellyfin playback is unaffected");
         }
+    }
+
+    private static Guid ReadEventId(object payload)
+    {
+        var property = payload.GetType().GetProperty("EventId");
+        return property?.GetValue(payload) is Guid id && id != Guid.Empty ? id : Guid.NewGuid();
     }
 }

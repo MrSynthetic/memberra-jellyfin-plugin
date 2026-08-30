@@ -13,4 +13,7 @@ public sealed class PluginConfiguration : BasePluginConfiguration
     public string InstallId { get; set; } = string.Empty;
     public string InstallToken { get; set; } = string.Empty;
     public int ProgressIntervalSeconds { get; set; } = 15;
+    public bool ReconciliationEnabled { get; set; } = true;
+    public int ReconciliationIntervalSeconds { get; set; } = 30;
+    public bool AllowRemoteStop { get; set; } = false;
 }

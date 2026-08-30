@@ -19,6 +19,7 @@ public sealed class PlaybackStartConsumer(MemberraClient client) : IEventConsume
         {
             await client.SendAsync(new
             {
+                SchemaVersion = MemberraProtocol.EventSchemaVersion,
                 NotificationType = type,
                 EventId = Guid.NewGuid(),
                 OccurredAt = DateTimeOffset.UtcNow,
@@ -34,7 +35,15 @@ public sealed class PlaybackStartConsumer(MemberraClient client) : IEventConsume
                 e.IsPaused,
                 PositionTicks = e.PlaybackPositionTicks ?? 0,
                 DurationTicks = e.Item.RunTimeTicks ?? 0,
-                PlayMethod = e.Session?.PlayState?.PlayMethod?.ToString()
+                PlayMethod = e.Session?.PlayState?.PlayMethod?.ToString(),
+                VideoCodec = e.Session?.TranscodingInfo?.VideoCodec,
+                AudioCodec = e.Session?.TranscodingInfo?.AudioCodec,
+                Container = e.Session?.TranscodingInfo?.Container,
+                BitrateKbps = e.Session?.TranscodingInfo?.Bitrate / 1000,
+                VideoWidth = e.Session?.TranscodingInfo?.Width,
+                VideoHeight = e.Session?.TranscodingInfo?.Height,
+                TranscodeReasons = e.Session?.TranscodingInfo?.TranscodeReasons.ToString(),
+                Source = "event"
             }, sessionId, progress).ConfigureAwait(false);
         }
         finally

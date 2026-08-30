@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 
 namespace Memberra.Jellyfin;
 
 internal static class MemberraProtocol
 {
-    public const string Version = "1.0.0";
+    public const string Version = "1.1.0";
+    public const int ProtocolVersion = 2;
+    public const int EventSchemaVersion = 1;
     public const string HttpClientName = "Memberra";
     public const int MaximumResponseBytes = 64 * 1024;
 
@@ -13,4 +16,21 @@ internal static class MemberraProtocol
     public static Uri RegisterUri { get; } = new(BaseUri, "api/public/jellyfin-plugin/register");
     public static Uri HeartbeatUri { get; } = new(BaseUri, "api/public/jellyfin-plugin/heartbeat");
     public static Uri EventsUri { get; } = new(BaseUri, "api/public/jellyfin-plugin/events");
+    public static Uri CommandAckUri { get; } = new(BaseUri, "api/public/jellyfin-plugin/command-ack");
+
+    public static IReadOnlyDictionary<string, bool> Capabilities(bool allowRemoteStop) =>
+        new Dictionary<string, bool>(StringComparer.Ordinal)
+        {
+            ["playback_events"] = true,
+            ["playback_reconciliation"] = true,
+            ["durable_outbox"] = true,
+            ["ordered_delivery"] = true,
+            ["protocol_negotiation"] = true,
+            ["rich_playback_telemetry"] = true,
+            ["runtime_metrics"] = true,
+            ["library_inventory"] = true,
+            ["remote_stop"] = allowRemoteStop,
+            ["server_metrics"] = false,
+            ["library_events"] = false
+        };
 }

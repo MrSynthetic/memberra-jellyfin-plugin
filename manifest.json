@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.1.0.0",
+        "changelog": "Durable ordered event delivery, outage and restart recovery, active-session reconciliation, explicit protocol and capability negotiation, queue diagnostics, and compatibility-first fail-safes.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.1.0/Memberra-Jellyfin-1.1.0.zip",
+        "checksum": "c09b83bb1c03feae992f50daa9942e9e",
+        "timestamp": "2026-08-30T09:27:44Z"
+      },
+      {
         "version": "1.0.0.0",
         "changelog": "Production release for Jellyfin 10.11.x with fixed-endpoint transport hardening, bounded playback state, replay-safe event ingestion and live watch analytics.",
         "targetAbi": "10.11.0.0",

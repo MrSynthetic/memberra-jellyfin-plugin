@@ -14,9 +14,14 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
     {
         services.AddHttpClient(MemberraProtocol.HttpClientName, ConfigureClient)
             .ConfigurePrimaryHttpMessageHandler(CreateHandler);
-        services.AddHttpClient<MemberraClient>(ConfigureClient)
-            .ConfigurePrimaryHttpMessageHandler(CreateHandler);
+        services.AddSingleton<DurableOutbox>();
+        services.AddSingleton<MemberraProtocolState>();
+        services.AddSingleton<MemberraClient>();
+        services.AddSingleton<CommandReceiptStore>();
+        services.AddSingleton<MemberraCommandProcessor>();
+        services.AddHostedService<OutboxDeliveryService>();
         services.AddHostedService<MemberraConnectionService>();
+        services.AddHostedService<SessionReconciliationService>();
         services.AddScoped<IEventConsumer<PlaybackStartEventArgs>, PlaybackStartConsumer>();
         services.AddScoped<IEventConsumer<PlaybackProgressEventArgs>, PlaybackProgressConsumer>();
         services.AddScoped<IEventConsumer<PlaybackStopEventArgs>, PlaybackStopConsumer>();
