@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 using MediaBrowser.Controller.Events;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Model.Entities;
 
 namespace Memberra.Jellyfin;
 
@@ -17,6 +19,26 @@ public sealed class PlaybackStartConsumer(MemberraClient client) : IEventConsume
         if (type == "PlaybackStart") client.ForgetSession(sessionId);
         try
         {
+            string? posterBase64 = null;
+            string? posterContentType = null;
+            if (type == "PlaybackStart")
+            {
+                try
+                {
+                    var path = e.Item.GetImagePath(ImageType.Primary, 0);
+                    if (!string.IsNullOrWhiteSpace(path))
+                    {
+                        var info = new FileInfo(path);
+                        if (info.Exists && info.Length > 0 && info.Length <= 524288)
+                        {
+                            posterBase64 = Convert.ToBase64String(await File.ReadAllBytesAsync(path).ConfigureAwait(false));
+                            posterContentType = info.Extension.ToLowerInvariant() switch { ".jpg" or ".jpeg" => "image/jpeg", ".png" => "image/png", ".webp" => "image/webp", _ => null };
+                            if (posterContentType is null) posterBase64 = null;
+                        }
+                    }
+                }
+                catch { }
+            }
             await client.SendAsync(new
             {
                 SchemaVersion = MemberraProtocol.EventSchemaVersion,
@@ -43,7 +65,9 @@ public sealed class PlaybackStartConsumer(MemberraClient client) : IEventConsume
                 VideoWidth = e.Session?.TranscodingInfo?.Width,
                 VideoHeight = e.Session?.TranscodingInfo?.Height,
                 TranscodeReasons = e.Session?.TranscodingInfo?.TranscodeReasons.ToString(),
-                Source = "event"
+                Source = "event",
+                PosterBase64 = posterBase64,
+                PosterContentType = posterContentType
             }, sessionId, progress).ConfigureAwait(false);
         }
         finally

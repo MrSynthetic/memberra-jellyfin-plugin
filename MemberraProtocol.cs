@@ -5,8 +5,8 @@ namespace Memberra.Jellyfin;
 
 internal static class MemberraProtocol
 {
-    public const string Version = "1.2.0";
-    public const int ProtocolVersion = 2;
+    public const string Version = "1.3.0";
+    public const int ProtocolVersion = 3;
     public const int EventSchemaVersion = 1;
     public const string HttpClientName = "Memberra";
     public const int MaximumResponseBytes = 64 * 1024;
@@ -31,6 +31,11 @@ internal static class MemberraProtocol
             ["library_inventory"] = true,
             ["remote_stop"] = allowRemoteStop,
             ["display_message"] = allowViewerMessages,
+            ["plugin_provisioning"] = true,
+            ["suspend_user"] = true,
+            ["password_reset"] = true,
+            ["library_scoping"] = true,
+            ["secure_posters"] = true,
             ["server_metrics"] = false,
             ["library_events"] = false
         };
