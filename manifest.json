@@ -47,6 +47,7 @@
         "checksum": "5a6c62831853163dc8ee0cf69cfb9c04",
         "timestamp": "2026-08-29T20:15:48Z"
       }
-    ]
+    ],
+    "imageUrl": "https://raw.githubusercontent.com/MrSynthetic/memberra-jellyfin-plugin/main/artwork/memberra-plugin-icon.png"
   }
 ]
