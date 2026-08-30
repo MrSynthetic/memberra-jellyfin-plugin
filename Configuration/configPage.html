@@ -1,5 +1,40 @@
 <!DOCTYPE html>
-<html><head><title>Memberra</title></head>
+<html><head><title>Memberra</title>
+  <style>
+    #MemberraConfigPage .memberraOption {
+      clear: both;
+      display: block;
+      margin: 1.35em 0;
+      min-height: 3em;
+    }
+    #MemberraConfigPage .memberraOption .checkboxContainer {
+      align-items: flex-start;
+      display: flex;
+      height: auto;
+      margin: 0;
+      min-height: 2.75em;
+      padding: .25em 0;
+      position: relative;
+      white-space: normal;
+      width: 100%;
+    }
+    #MemberraConfigPage .memberraOption .checkboxContainer span {
+      line-height: 1.45;
+      min-width: 0;
+      pointer-events: none;
+      white-space: normal;
+    }
+    #MemberraConfigPage .memberraOption .fieldDescription {
+      clear: both;
+      margin: .35em 0 0 3.25em;
+      position: static;
+    }
+    @media (max-width: 600px) {
+      #MemberraConfigPage .memberraOption { margin: 1.6em 0; }
+      #MemberraConfigPage .memberraOption .fieldDescription { margin-left: 0; }
+    }
+  </style>
+</head>
 <body>
 <div id="MemberraConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
   <div data-role="content"><div class="content-primary">
@@ -9,10 +44,10 @@
       <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="PairingCode">One-time pairing code</label><input id="PairingCode" is="emby-input" type="password" autocomplete="one-time-code" /></div>
       <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="ProgressInterval">Progress interval (seconds)</label><input id="ProgressInterval" is="emby-input" type="number" min="5" max="300" /></div>
       <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="ReconciliationInterval">Recovery check interval (seconds)</label><input id="ReconciliationInterval" is="emby-input" type="number" min="15" max="300" /><div class="fieldDescription">Compares Memberra events with Jellyfin's active sessions to recover events missed during restarts or network interruptions.</div></div>
-      <label class="checkboxContainer"><input id="ReconciliationEnabled" type="checkbox" is="emby-checkbox"/><span>Enable playback recovery and reconciliation</span></label>
-      <label class="checkboxContainer"><input id="AllowRemoteStop" type="checkbox" is="emby-checkbox"/><span>Allow authorised Memberra operators to stop active playback</span><div class="fieldDescription">Off by default. Commands are limited to an active Jellyfin session and recorded by Memberra.</div></label>
-      <label class="checkboxContainer"><input id="AllowViewerMessages" type="checkbox" is="emby-checkbox"/><span>Allow authorised Memberra operators to message active viewers</span><div class="fieldDescription">Off by default. Messages are limited to 240 characters and displayed only on the selected active player.</div></label>
-      <label class="checkboxContainer"><input id="Enabled" type="checkbox" is="emby-checkbox"/><span>Enable Memberra integration</span></label>
+      <div class="memberraOption"><label class="checkboxContainer" for="ReconciliationEnabled"><input id="ReconciliationEnabled" type="checkbox" is="emby-checkbox"/><span>Enable playback recovery and reconciliation</span></label></div>
+      <div class="memberraOption"><label class="checkboxContainer" for="AllowRemoteStop"><input id="AllowRemoteStop" type="checkbox" is="emby-checkbox"/><span>Allow authorised Memberra operators to stop active playback</span></label><div class="fieldDescription">Off by default. Commands are limited to an active Jellyfin session and recorded by Memberra.</div></div>
+      <div class="memberraOption"><label class="checkboxContainer" for="AllowViewerMessages"><input id="AllowViewerMessages" type="checkbox" is="emby-checkbox"/><span>Allow authorised Memberra operators to message active viewers</span></label><div class="fieldDescription">Off by default. Messages are limited to 240 characters and displayed only on the selected active player.</div></div>
+      <div class="memberraOption"><label class="checkboxContainer" for="Enabled"><input id="Enabled" type="checkbox" is="emby-checkbox"/><span>Enable Memberra integration</span></label></div>
       <button is="emby-button" type="submit" class="raised button-submit block"><span>Save</span></button>
     </form>
   </div></div>
