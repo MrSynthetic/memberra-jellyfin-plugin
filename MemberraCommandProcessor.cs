@@ -76,6 +76,7 @@ public sealed class MemberraCommandProcessor(
                 else if (string.Equals(type, "reset_password", StringComparison.Ordinal)) result = await ResetPasswordAsync(payload).ConfigureAwait(false);
                 else if (string.Equals(type, "delete_user", StringComparison.Ordinal)) result = await DeleteUserAsync(payload).ConfigureAwait(false);
                 else if (string.Equals(type, "update_libraries", StringComparison.Ordinal)) result = await UpdateLibrariesAsync(payload).ConfigureAwait(false);
+                else if (string.Equals(type, "list_users", StringComparison.Ordinal)) result = ListUsers();
                 else throw new InvalidOperationException("Unsupported command type.");
                 receipts.MarkSucceeded(id);
                 succeeded = true;
@@ -134,6 +135,22 @@ public sealed class MemberraCommandProcessor(
         var user = RequireUser(payload);
         await ApplyPolicyAsync(user.Id, payload, null).ConfigureAwait(false);
         return new { providerUserId = user.Id.ToString("N") };
+    }
+
+    private object ListUsers()
+    {
+        var users = Users.GetUsers().Select(user =>
+        {
+            var dto = Users.GetUserDto(user);
+            return new
+            {
+                id = user.Id.ToString("N"),
+                username = user.Username,
+                email = (string?)null,
+                enabled = !dto.Policy.IsDisabled
+            };
+        }).ToArray();
+        return new { users };
     }
 
     private global::Jellyfin.Database.Implementations.Entities.User RequireUser(JsonElement payload)

@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.4.0.0",
+        "changelog": "Adds authoritative Jellyfin user inventory so Memberra can discover every current account and reconcile removed accounts accurately.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.4.0/Memberra-Jellyfin-1.4.0.zip",
+        "checksum": "ff54b47f63c5ee79b1404560bec8e8c9",
+        "timestamp": "2026-09-01T15:15:00Z"
+      },
+      {
         "version": "1.3.1.0",
         "changelog": "Fixes untappable remote-stop and viewer-message controls on mobile Jellyfin dashboards while preserving all 1.3 provisioning, recovery and telemetry capabilities.",
         "targetAbi": "10.11.0.0",
