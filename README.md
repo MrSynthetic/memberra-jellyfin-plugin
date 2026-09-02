@@ -2,6 +2,8 @@
 
 Production integration between Jellyfin 10.11.x and the Memberra operator platform. It reports health and playback events through a revocable per-server token. It does not receive arbitrary code or shell commands.
 
+Version 1.5 adds complete operator-side account management, including safe username changes alongside provisioning, suspension, restoration, password reset, deletion, library policy and authoritative user inventory.
+
 ## Install from the Jellyfin dashboard
 
 1. Open **Dashboard → Plugins → Repositories** in Jellyfin.

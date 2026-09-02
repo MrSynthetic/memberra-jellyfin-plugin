@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.5.0.0",
+        "changelog": "Adds safe operator-side account renaming and administrator-aware inventory for Memberra's unified Media Account Control Centre.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.5.0/Memberra-Jellyfin-1.5.0.zip",
+        "checksum": "7adda6541acebfa2d5c51d6ba4e06b28",
+        "timestamp": "2026-09-02T19:30:00Z"
+      },
+      {
         "version": "1.4.0.0",
         "changelog": "Adds authoritative Jellyfin user inventory so Memberra can discover every current account and reconcile removed accounts accurately.",
         "targetAbi": "10.11.0.0",

@@ -74,6 +74,7 @@ public sealed class MemberraCommandProcessor(
                 else if (string.Equals(type, "suspend_user", StringComparison.Ordinal)) result = await SetDisabledAsync(payload, true).ConfigureAwait(false);
                 else if (string.Equals(type, "restore_user", StringComparison.Ordinal)) result = await SetDisabledAsync(payload, false).ConfigureAwait(false);
                 else if (string.Equals(type, "reset_password", StringComparison.Ordinal)) result = await ResetPasswordAsync(payload).ConfigureAwait(false);
+                else if (string.Equals(type, "rename_user", StringComparison.Ordinal)) result = await RenameUserAsync(payload).ConfigureAwait(false);
                 else if (string.Equals(type, "delete_user", StringComparison.Ordinal)) result = await DeleteUserAsync(payload).ConfigureAwait(false);
                 else if (string.Equals(type, "update_libraries", StringComparison.Ordinal)) result = await UpdateLibrariesAsync(payload).ConfigureAwait(false);
                 else if (string.Equals(type, "list_users", StringComparison.Ordinal)) result = ListUsers();
@@ -130,6 +131,17 @@ public sealed class MemberraCommandProcessor(
         return new { providerUserId = user.Id.ToString("N") };
     }
 
+    private async Task<object> RenameUserAsync(JsonElement payload)
+    {
+        var user = RequireUser(payload);
+        var username = payload.GetProperty("username").GetString()?.Trim();
+        if (string.IsNullOrWhiteSpace(username) || username.Length > 64)
+            throw new InvalidOperationException("Username is missing or too long.");
+        user.Username = username;
+        await Users.UpdateUserAsync(user).ConfigureAwait(false);
+        return new { providerUserId = user.Id.ToString("N"), providerUsername = username };
+    }
+
     private async Task<object> UpdateLibrariesAsync(JsonElement payload)
     {
         var user = RequireUser(payload);
@@ -147,7 +159,8 @@ public sealed class MemberraCommandProcessor(
                 id = user.Id.ToString("N"),
                 username = user.Username,
                 email = (string?)null,
-                enabled = !dto.Policy.IsDisabled
+                enabled = !dto.Policy.IsDisabled,
+                isAdministrator = dto.Policy.IsAdministrator
             };
         }).ToArray();
         return new { users };

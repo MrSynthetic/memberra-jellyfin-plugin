@@ -5,7 +5,7 @@ namespace Memberra.Jellyfin;
 
 internal static class MemberraProtocol
 {
-    public const string Version = "1.4.0";
+    public const string Version = "1.5.0";
     public const int ProtocolVersion = 3;
     public const int EventSchemaVersion = 1;
     public const string HttpClientName = "Memberra";
@@ -34,6 +34,7 @@ internal static class MemberraProtocol
             ["plugin_provisioning"] = true,
             ["suspend_user"] = true,
             ["password_reset"] = true,
+            ["rename_user"] = true,
             ["library_scoping"] = true,
             ["secure_posters"] = true,
             ["user_inventory"] = true,
