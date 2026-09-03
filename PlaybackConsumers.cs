@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.IO;
 using MediaBrowser.Controller.Events;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Model.Entities;
 
 namespace Memberra.Jellyfin;
@@ -51,6 +52,7 @@ public sealed class PlaybackStartConsumer(MemberraClient client) : IEventConsume
                 ItemId = e.Item.Id,
                 ItemName = e.Item.Name,
                 ItemType = e.Item.GetType().Name,
+                SeriesTitle = (e.Item as Episode)?.SeriesName,
                 e.DeviceId,
                 e.DeviceName,
                 e.ClientName,

@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.5.1.0",
+        "changelog": "Adds parent-series metadata for reliable TVDB-first and TMDB-fallback television posters in Memberra live watch analytics.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.5.1/Memberra-Jellyfin-1.5.1.zip",
+        "checksum": "de5f2649274089a3e65ce5985e32782d",
+        "timestamp": "2026-09-03T11:25:00Z"
+      },
+      {
         "version": "1.5.0.0",
         "changelog": "Adds safe operator-side account renaming and administrator-aware inventory for Memberra's unified Media Account Control Centre.",
         "targetAbi": "10.11.0.0",
