@@ -8,12 +8,12 @@
     "category": "General",
     "versions": [
       {
-        "version": "1.5.1.0",
-        "changelog": "Securely connects Jellyfin to Memberra with customer provisioning, library access control, suspension, restoration, deletion and password self-service; authoritative user inventory and username management; server health, playback and transcode telemetry; durable outage-safe event delivery; television artwork metadata; and opt-in, audited viewer controls. The plugin cannot run shell commands or arbitrary code.",
+        "version": "1.6.0.0",
+        "changelog": "Adds a secure, operator-only, read-only library browser with bounded paging, media metadata and file availability checks. Memberra cannot move, edit or delete media. Includes customer provisioning, access control, password self-service, health and playback telemetry, durable event delivery and audited viewer controls.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.5.1/Memberra-Jellyfin-1.5.1.zip",
-        "checksum": "de5f2649274089a3e65ce5985e32782d",
-        "timestamp": "2026-09-03T11:25:00Z"
+        "sourceUrl": "https://github.com/MrSynthetic/memberra-jellyfin-plugin/releases/download/v1.6.0/Memberra-Jellyfin-1.6.0.zip",
+        "checksum": "a023038145ab223e8932cbfbc110fa0a",
+        "timestamp": "2026-09-14T13:10:00Z"
       }
     ],
     "imageUrl": "https://raw.githubusercontent.com/MrSynthetic/memberra-jellyfin-plugin/main/artwork/memberra-plugin-icon.png"

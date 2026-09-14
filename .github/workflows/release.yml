@@ -1,0 +1,35 @@
+name: Publish plugin release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "MemberraProtocol.cs"
+      - "releases/Memberra-Jellyfin-*.zip"
+      - ".github/workflows/release.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish versioned plugin archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's/.*Version = "\([^"]*\)".*/\1/p' MemberraProtocol.cs)
+          tag="v${version}"
+          archive="releases/Memberra-Jellyfin-${version}.zip"
+          test -n "$version"
+          test -f "$archive"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists"
+            exit 0
+          fi
+          gh release create "$tag" "$archive" \
+            --target "$GITHUB_SHA" \
+            --title "Memberra for Jellyfin ${version}" \
+            --notes "Adds an operator-only, read-only library inventory with bounded paging, media metadata and file availability checks. It cannot move, edit or delete media."

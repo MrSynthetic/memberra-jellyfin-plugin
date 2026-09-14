@@ -1,5 +1,8 @@
 # Memberra for Jellyfin
 
+Version 1.6 adds an operator-only, read-only library inventory with bounded paging,
+file availability checks and media metadata. It cannot move, edit or delete media.
+
 Production integration between Jellyfin 10.11.x and the Memberra operator platform. It reports health and playback events through a revocable per-server token. It does not receive arbitrary code or shell commands.
 
 Version 1.5.1 adds parent-series metadata for reliable TVDB/TMDB television artwork. Version 1.5 also includes complete operator-side account management, including safe username changes alongside provisioning, suspension, restoration, password reset, deletion, library policy and authoritative user inventory.
