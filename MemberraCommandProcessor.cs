@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -8,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Session;
 using Microsoft.Extensions.Logging;
 
@@ -19,9 +21,11 @@ public sealed class MemberraCommandProcessor(
     CommandReceiptStore receipts,
     MemberraProtocolState protocolState,
     ILogger<MemberraCommandProcessor> log,
-    IUserManager? userManager = null)
+    IUserManager? userManager = null,
+    ILibraryManager? libraryManager = null)
 {
     private IUserManager Users => userManager ?? throw new InvalidOperationException("Jellyfin user management is unavailable.");
+    private ILibraryManager Libraries => libraryManager ?? throw new InvalidOperationException("Jellyfin library inventory is unavailable.");
     public async Task ProcessHeartbeatAsync(HttpResponseMessage response, Configuration.PluginConfiguration cfg, CancellationToken ct)
     {
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
@@ -78,6 +82,7 @@ public sealed class MemberraCommandProcessor(
                 else if (string.Equals(type, "delete_user", StringComparison.Ordinal)) result = await DeleteUserAsync(payload).ConfigureAwait(false);
                 else if (string.Equals(type, "update_libraries", StringComparison.Ordinal)) result = await UpdateLibrariesAsync(payload).ConfigureAwait(false);
                 else if (string.Equals(type, "list_users", StringComparison.Ordinal)) result = ListUsers();
+                else if (string.Equals(type, "library_inventory", StringComparison.Ordinal)) result = ReadLibraryInventory(payload);
                 else throw new InvalidOperationException("Unsupported command type.");
                 receipts.MarkSucceeded(id);
                 succeeded = true;
@@ -166,6 +171,46 @@ public sealed class MemberraCommandProcessor(
         return new { users };
     }
 
+    private object ReadLibraryInventory(JsonElement payload)
+    {
+        var startIndex = payload.TryGetProperty("startIndex", out var startValue) && startValue.TryGetInt32(out var start)
+            ? Math.Max(0, start)
+            : 0;
+        var limit = payload.TryGetProperty("limit", out var limitValue) && limitValue.TryGetInt32(out var requestedLimit)
+            ? Math.Clamp(requestedLimit, 1, 100)
+            : 50;
+        var result = Libraries.GetItemsResult(new InternalItemsQuery
+        {
+            Recursive = true,
+            IsFolder = false,
+            IsVirtualItem = false,
+            StartIndex = startIndex,
+            Limit = limit
+        });
+        var folders = Libraries.GetVirtualFolders().Select(folder => new
+        {
+            name = folder.Name,
+            collectionType = folder.CollectionType?.ToString(),
+            locations = folder.Locations.Take(20).ToArray()
+        }).Take(100).ToArray();
+        var items = result.Items.Select(item => new
+        {
+            id = item.Id.ToString("N"),
+            name = item.Name,
+            type = item.GetType().Name,
+            path = item.Path,
+            available = !string.IsNullOrWhiteSpace(item.Path) && File.Exists(item.Path),
+            sizeBytes = item.Size,
+            runtimeTicks = item.RunTimeTicks,
+            productionYear = item.ProductionYear,
+            width = item.Width,
+            height = item.Height,
+            bitrate = item.TotalBitrate,
+            container = item.Container
+        }).ToArray();
+        return new { readOnly = true, startIndex, limit, totalRecordCount = result.TotalRecordCount, libraries = folders, items };
+    }
+
     private global::Jellyfin.Database.Implementations.Entities.User RequireUser(JsonElement payload)
     {
         var raw = payload.GetProperty("userId").GetString();
@@ -190,17 +235,19 @@ public sealed class MemberraCommandProcessor(
     private async Task AcknowledgeAsync(Guid commandId, bool succeeded, string error, object result, Configuration.PluginConfiguration cfg, CancellationToken ct)
     {
         using var http = clients.CreateClient(MemberraProtocol.HttpClientName);
+        var payload = JsonSerializer.Serialize(new
+        {
+            commandId,
+            status = succeeded ? "succeeded" : "failed",
+            error = succeeded ? null : error,
+            result
+        });
         using var request = new HttpRequestMessage(HttpMethod.Post, MemberraProtocol.CommandAckUri)
         {
-            Content = JsonContent.Create(new
-            {
-                commandId,
-                status = succeeded ? "succeeded" : "failed",
-                error = succeeded ? null : error,
-                result
-            })
+            Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cfg.InstallId + "." + cfg.InstallToken);
+        MemberraRequestSigning.ApplyHeaders(request, cfg.InstallToken, payload);
         request.Headers.TryAddWithoutValidation("X-Memberra-Protocol", MemberraProtocol.ProtocolVersion.ToString());
         using var response = await http.SendAsync(request, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
