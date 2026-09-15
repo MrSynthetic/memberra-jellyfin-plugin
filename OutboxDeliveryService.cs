@@ -36,6 +36,7 @@ public sealed class OutboxDeliveryService(
                         Content = new StringContent(pending.Value.Item.Payload, Encoding.UTF8, "application/json")
                     };
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cfg.InstallId + "." + cfg.InstallToken);
+                    MemberraRequestSigning.ApplyHeaders(request, cfg.InstallToken, pending.Value.Item.Payload);
                     request.Headers.TryAddWithoutValidation("X-Memberra-Protocol", MemberraProtocol.ProtocolVersion.ToString());
                     using var response = await http.SendAsync(request, stoppingToken).ConfigureAwait(false);
                     if (response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.Conflict)

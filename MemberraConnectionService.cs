@@ -84,7 +84,7 @@ public sealed class MemberraConnectionService : BackgroundService
     {
         _log.LogDebug("Sending Memberra heartbeat");
         using var http = _clients.CreateClient(MemberraProtocol.HttpClientName);
-        using var request = new HttpRequestMessage(HttpMethod.Post, MemberraProtocol.HeartbeatUri) { Content = JsonContent.Create(new
+        var payload = JsonSerializer.Serialize(new
         {
             serverName = "Jellyfin " + _host.SystemId[..8],
             jellyfinVersion = _host.ApplicationVersionString,
@@ -104,8 +104,10 @@ public sealed class MemberraConnectionService : BackgroundService
                 name = l.Name,
                 kind = l.CollectionType?.ToString()
             }).Take(500).ToArray()
-        }) };
+        });
+        using var request = new HttpRequestMessage(HttpMethod.Post, MemberraProtocol.HeartbeatUri) { Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json") };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cfg.InstallId + "." + cfg.InstallToken);
+        MemberraRequestSigning.ApplyHeaders(request, cfg.InstallToken, payload);
         request.Headers.TryAddWithoutValidation("X-Memberra-Protocol", MemberraProtocol.ProtocolVersion.ToString());
         using var response = await http.SendAsync(request, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode) _log.LogWarning("Memberra heartbeat rejected with HTTP {Status}", (int)response.StatusCode);
