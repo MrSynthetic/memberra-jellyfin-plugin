@@ -22,14 +22,14 @@ jobs:
         run: |
           version=$(sed -n 's/.*Version = "\([^"]*\)".*/\1/p' MemberraProtocol.cs)
           tag="v${version}"
-          archive="releases/Memberra-Jellyfin-${version}.zip"
+          archives=(releases/Memberra-Jellyfin-${version}-10.11.zip releases/Memberra-Jellyfin-${version}-12.zip)
           test -n "$version"
-          test -f "$archive"
+          for a in "${archives[@]}"; do test -f "$a"; done
           if gh release view "$tag" >/dev/null 2>&1; then
             echo "Release $tag already exists"
             exit 0
           fi
-          gh release create "$tag" "$archive" \
+          gh release create "$tag" "${archives[@]}" \
             --target "$GITHUB_SHA" \
             --title "Memberra for Jellyfin ${version}" \
-            --notes "Adds an operator-only, read-only library inventory with bounded paging, media metadata and file availability checks. It cannot move, edit or delete media."
+            --notes "Adds Jellyfin 12 support. Two builds from the same source: Memberra-Jellyfin-${version}-10.11.zip for Jellyfin 10.11.x and Memberra-Jellyfin-${version}-12.zip for Jellyfin 12.x. Jellyfin installs the right one automatically from the plugin repository."
