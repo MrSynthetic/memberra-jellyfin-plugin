@@ -247,7 +247,6 @@ public sealed class MemberraCommandProcessor(
             Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cfg.InstallId + "." + cfg.InstallToken);
-        MemberraRequestSigning.ApplyHeaders(request, cfg.InstallToken, payload);
         request.Headers.TryAddWithoutValidation("X-Memberra-Protocol", MemberraProtocol.ProtocolVersion.ToString());
         using var response = await http.SendAsync(request, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
